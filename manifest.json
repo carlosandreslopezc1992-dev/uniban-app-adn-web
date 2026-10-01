@@ -1,0 +1,16 @@
+{
+  "name": "App ADN · Inventario de insumos Unibán",
+  "short_name": "ADN Unibán",
+  "description": "Control de insumos de empaque en fincas",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E4E0DB",
+  "theme_color": "#00843D",
+  "icons": [
+    { "src": "img/icono-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "img/icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
