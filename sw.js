@@ -5,7 +5,7 @@
  * publiquemos se ven de inmediato.
  * Las llamadas al servidor (POST a Apps Script) no pasan por aquí.
  */
-const CACHE = 'adn-v0.1.0';
+const CACHE = 'adn-v0.1.1';
 const ARCHIVOS = [
   './', 'index.html', 'css/estilos.css', 'js/config.js', 'js/api.js', 'js/app.js',
   'manifest.json', 'img/logo-uniban-blanco.png', 'img/icono-192.png', 'img/icono-512.png'

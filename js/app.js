@@ -67,6 +67,7 @@
     evaluarReglas();
     $('bloque-actual').hidden = obligatorio;
     $('clave-cancelar').hidden = obligatorio;
+    $('clave-titulo').textContent = obligatorio ? 'Crea tu contraseña' : 'Cambia tu contraseña';
     $('clave-intro').textContent = obligatorio
       ? 'Por seguridad, cambia la contraseña temporal por una que solo tú conozcas.'
       : 'Escribe tu contraseña actual y la nueva.';

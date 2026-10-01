@@ -6,6 +6,6 @@
  */
 const CONFIG_APP = {
   URL_SERVIDOR: 'https://script.google.com/macros/s/AKfycbztB0r_QSEIZXuxbMJikhTNLrEMJ5LrJU9BRmdYiTln2sglKPUPq5nn8guOk-0fjb_Vug/exec',
-  VERSION: '0.1.0',
+  VERSION: '0.1.1',
   TIEMPO_ESPERA_MS: 45000
 };
