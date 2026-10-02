@@ -40,6 +40,73 @@
           <div class="mensaje" id="login-mensaje" role="alert" hidden></div>
           <button type="submit" class="boton" id="login-boton">Ingresar</button>
         </form>
+        <p class="cambio-vista">¿No tienes cuenta? <button type="button" class="enlace" id="login-registro">Solicita acceso</button></p>
+      </div>
+    </section>
+
+    <!-- ===== Vista: Solicitar acceso ===== -->
+    <section id="vista-registro" class="vista" hidden>
+      <div class="tarjeta">
+        <h1>Solicita acceso</h1>
+        <div id="registro-bloque-form">
+          <p class="ayuda">Llena tus datos. Un administrador revisará tu solicitud.</p>
+          <form id="form-registro" novalidate>
+            <label for="reg-nombre">Nombre completo</label>
+            <input id="reg-nombre" autocomplete="name" required>
+
+            <label for="reg-correo">Correo</label>
+            <input id="reg-correo" type="email" autocomplete="email" autocapitalize="none" spellcheck="false" required>
+
+            <label for="reg-celular">Celular (opcional)</label>
+            <input id="reg-celular" type="tel" autocomplete="tel">
+
+            <label for="reg-zona">Zona</label>
+            <select id="reg-zona" required>
+              <option value="">Elige tu zona</option>
+              <option value="URABA">Urabá</option>
+              <option value="SM">Santa Marta</option>
+            </select>
+
+            <label for="reg-rol">Rol que solicitas</label>
+            <select id="reg-rol" required>
+              <option value="">Elige un rol</option>
+            </select>
+
+            <div id="reg-bloque-cod" hidden>
+              <label for="reg-cod" id="reg-cod-etiqueta">Finca</label>
+              <div class="buscador">
+                <input id="reg-cod" autocomplete="off" autocapitalize="none" spellcheck="false">
+                <ul class="buscador__lista" id="reg-cod-lista" hidden></ul>
+              </div>
+            </div>
+
+            <label for="reg-clave">Contraseña</label>
+            <div class="campo-clave">
+              <input id="reg-clave" type="password" autocomplete="new-password" required>
+              <button type="button" class="ver-clave" data-para="reg-clave" aria-label="Mostrar contraseña">Ver</button>
+            </div>
+
+            <label for="reg-confirmar">Confirma la contraseña</label>
+            <input id="reg-confirmar" type="password" autocomplete="new-password" required>
+
+            <ul class="reglas" id="reg-reglas">
+              <li data-regla="largo">Mínimo 8 caracteres</li>
+              <li data-regla="letra">Al menos una letra</li>
+              <li data-regla="numero">Al menos un número</li>
+              <li data-regla="igual">Las dos coinciden</li>
+            </ul>
+
+            <div class="mensaje" id="registro-mensaje" role="alert" hidden></div>
+            <button type="submit" class="boton" id="registro-boton">Enviar solicitud</button>
+            <button type="button" class="boton boton--secundario" id="registro-volver">Volver al ingreso</button>
+          </form>
+        </div>
+
+        <div id="registro-listo" hidden>
+          <div class="mensaje mensaje--ok">Tu solicitud quedó pendiente de aprobación.</div>
+          <p class="ayuda">Cuando un administrador la apruebe, podrás ingresar con tu correo y tu contraseña.</p>
+          <button type="button" class="boton" id="registro-listo-volver">Volver al ingreso</button>
+        </div>
       </div>
     </section>
 
@@ -95,10 +162,23 @@
       <div class="tarjeta tarjeta--modulo">
         <h2>Tu módulo</h2>
         <p class="ayuda">Aquí aparecerán las opciones de tu rol a medida que se construyan.</p>
+        <button type="button" class="boton" id="inicio-pendientes" hidden>Solicitudes pendientes (<span id="inicio-pendientes-n">…</span>)</button>
+        <div class="mensaje" id="inicio-mensaje" role="alert" hidden></div>
       </div>
 
       <button type="button" class="boton boton--secundario" id="inicio-cambiar-clave">Cambiar contraseña</button>
       <button type="button" class="boton boton--salir" id="inicio-salir">Cerrar sesión</button>
+    </section>
+
+    <!-- ===== Vista: Solicitudes pendientes (solo ADMIN) ===== -->
+    <section id="vista-pendientes" class="vista" hidden>
+      <div class="tarjeta">
+        <h1>Solicitudes pendientes</h1>
+        <p class="ayuda" id="pendientes-resumen"></p>
+        <div class="mensaje" id="pendientes-mensaje" role="alert" hidden></div>
+      </div>
+      <div class="lista-solicitudes" id="pendientes-lista"></div>
+      <button type="button" class="boton boton--secundario" id="pendientes-volver">Volver al inicio</button>
     </section>
   </main>
 

@@ -67,7 +67,7 @@ h2 { color: var(--verde); font-size: 18px; font-weight: 800; margin: 0 0 4px; }
 
 /* ---------- Formularios ---------- */
 label { display: block; font-weight: 700; font-size: 14px; margin: 14px 0 6px; }
-input {
+input, select, textarea {
   width: 100%;
   font: inherit;
   font-size: 17px; /* 16 px o más evita el zoom automático en iPhone */
@@ -77,7 +77,9 @@ input {
   color: var(--gris);
   background: var(--blanco);
 }
-input:focus { outline: none; border-color: var(--verde); }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--verde); }
+input:disabled { background: var(--arena); color: var(--gris-claro); }
+textarea { resize: vertical; min-height: 90px; }
 
 .campo-clave { position: relative; }
 .campo-clave input { padding-right: 64px; }
@@ -102,6 +104,15 @@ input:focus { outline: none; border-color: var(--verde); }
 .boton--secundario { background: var(--blanco); color: var(--verde); border: 2px solid var(--verde); margin-top: 0; }
 .boton--salir { background: transparent; color: var(--gris); border: 2px solid var(--gris-claro); margin-top: 0; }
 form .boton--secundario { margin-top: 10px; }
+.boton--peligro { background: var(--blanco); color: var(--error); border: 2px solid var(--error); }
+.boton--peligro-lleno { background: var(--error); }
+
+/* Botón que se ve como enlace */
+.cambio-vista { text-align: center; font-size: 14px; margin: 18px 0 0; }
+.enlace {
+  border: 0; background: none; padding: 8px 2px; cursor: pointer;
+  font: inherit; font-weight: 800; color: var(--verde); text-decoration: underline;
+}
 
 /* ---------- Mensajes ---------- */
 .mensaje {
@@ -129,6 +140,34 @@ form .boton--secundario { margin-top: 10px; }
 }
 .etiqueta--suave { background: var(--arena); color: var(--gris); }
 .tarjeta--modulo { border-left: 5px solid var(--naranja); }
+.tarjeta--modulo .boton { margin-top: 16px; }
+
+/* ---------- Lista con búsqueda (finca / grupo) ---------- */
+.buscador__lista {
+  list-style: none; margin: 6px 0 0; padding: 4px;
+  border: 2px solid var(--verde); border-radius: 10px;
+  background: var(--blanco); max-height: 264px; overflow-y: auto;
+}
+.buscador__opcion {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  border: 0; border-radius: 8px; background: none; padding: 12px 10px;
+  font: inherit; font-size: 16px; color: var(--gris);
+}
+.buscador__opcion:hover, .buscador__opcion:focus { background: var(--arena); outline: none; }
+.buscador__vacio { padding: 12px 10px; font-size: 14px; color: var(--gris-claro); }
+
+/* ---------- Solicitudes pendientes ---------- */
+.lista-solicitudes { display: flex; flex-direction: column; gap: 14px; }
+.solicitud { border-left: 5px solid var(--naranja); }
+.solicitud__datos {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;
+  margin: 10px 0 0; font-size: 14px;
+}
+.solicitud__datos dt { font-weight: 700; }
+.solicitud__datos dd { margin: 0; overflow-wrap: anywhere; }
+.solicitud__acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.solicitud__acciones .boton { margin-top: 0; }
+.solicitud__panel { margin-top: 14px; padding-top: 2px; border-top: 2px solid var(--arena); }
 
 /* ---------- Pie ---------- */
 .pie { text-align: center; font-size: 12px; color: var(--gris-claro); padding: 12px 0 18px; }
