@@ -1,6 +1,9 @@
 /**
- * app.js — Lógica de las pantallas: ingreso, cambio de contraseña, inicio,
- * solicitud de acceso y aprobación de solicitudes (ADMIN).
+ * app.js — Lo común a todas las pantallas: sesión, vistas, mensajes, catálogo
+ * de fincas y grupos, lista con búsqueda, ingreso, cambio de contraseña, inicio
+ * y salida. Cada módulo (registro.js, pendientes.js…) vive en su propio archivo
+ * y usa lo de aquí a través del objeto global App.
+ *
  * La sesión (token + perfil) se guarda en el celular solo hasta que vence
  * (8 horas) o hasta que el usuario sale. La contraseña NUNCA se guarda:
  * solo se mantiene en memoria el tiempo justo para cambiar la temporal.
@@ -10,7 +13,8 @@
   let claveEnMemoria = null; // solo durante el cambio obligatorio
   let catalogo = null;        // { fincas, grupos } de listarCatalogo, solo en memoria
   let catalogoPromesa = null;
-  let pendientes = [];        // solicitudes que ve el ADMIN
+  const ganchosInicio = [];   // módulos que quieren enterarse cuando se muestra el inicio
+  const ganchosSalir = [];    // módulos que borran sus datos al cerrar sesión
 
   const $ = id => document.getElementById(id);
   const ROLES = {
@@ -44,9 +48,10 @@
   }
 
   // ---------- Vistas ----------
+  // Muestra una sola vista. Busca todas las <section class="vista">, así un módulo
+  // nuevo solo tiene que agregar su sección en index.html.
   function mostrar(vista) {
-    ['vista-login', 'vista-clave', 'vista-inicio', 'vista-registro', 'vista-pendientes']
-      .forEach(v => { $(v).hidden = v !== vista; });
+    document.querySelectorAll('main > .vista').forEach(v => { v.hidden = v.id !== vista; });
     window.scrollTo(0, 0);
   }
   // Recibe el id del recuadro de mensaje o el elemento mismo (tarjetas creadas desde JS).
@@ -89,10 +94,13 @@
     const vence = new Date(s.exp).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
     $('inicio-sesion').textContent = 'Sesión activa hasta las ' + vence;
     aviso('inicio-mensaje', '');
-    const esAdmin = s.perfil.rol === 'ADMIN';
-    $('inicio-pendientes').hidden = !esAdmin;
     mostrar('vista-inicio');
-    if (esAdmin) cargarPendientes(s, 'inicio-mensaje');
+    ganchosInicio.forEach(fn => fn(s)); // cada módulo muestra sus botones según el rol
+  }
+  // Para los botones "Volver" y "Cancelar": al inicio si hay sesión, si no al ingreso.
+  function volverAInicio() {
+    const s = leerSesion();
+    s ? irAInicio(s) : mostrar('vista-login');
   }
 
   function irACambioClave(obligatorio) {
@@ -163,7 +171,6 @@
     return Object.values(reglas).every(Boolean);
   }
   const reglasClave = () => evaluarReglas('clave-nueva', 'clave-confirmar', 'reglas');
-  const reglasRegistro = () => evaluarReglas('reg-clave', 'reg-confirmar', 'reg-reglas');
 
   // ---------- Cambio de contraseña ----------
   $('clave-nueva').addEventListener('input', reglasClave);
@@ -194,10 +201,7 @@
     }
   });
 
-  $('clave-cancelar').addEventListener('click', () => {
-    const s = leerSesion();
-    s ? irAInicio(s) : mostrar('vista-login');
-  });
+  $('clave-cancelar').addEventListener('click', volverAInicio);
 
   // ---------- Inicio ----------
   $('inicio-cambiar-clave').addEventListener('click', () => irACambioClave(false));
@@ -206,7 +210,7 @@
     const s = leerSesion();
     borrarSesion();
     claveEnMemoria = null;
-    pendientes = [];
+    ganchosSalir.forEach(fn => fn()); // cada módulo borra lo que tenga en memoria
     mostrar('vista-login');
     if (s) { try { await Api.llamar('cerrarSesion', { dispositivo: dispositivo() }, s.token); } catch (e) { /* sin red: igual sale */ } }
   });
@@ -220,6 +224,11 @@
         .catch(err => { catalogoPromesa = null; throw err; });
     }
     return catalogoPromesa;
+  }
+  // Para que la próxima vez se pida de nuevo (por ejemplo, después de crear una finca).
+  function olvidarCatalogo() {
+    catalogo = null;
+    catalogoPromesa = null;
   }
   // Fincas (rol FINCA) o grupos (rol GRUPO) de la zona. null = la lista aún no llega.
   function opcionesCatalogo(rol, zona) {
@@ -284,286 +293,6 @@
     };
   }
 
-  // ---------- Solicitar acceso ----------
-  llenarRoles($('reg-rol'));
-  const regBuscador = crearBuscador($('reg-cod'), $('reg-cod-lista'),
-    () => opcionesCatalogo($('reg-rol').value, $('reg-zona').value));
-
-  function actualizarBloqueCodigo() {
-    const rol = $('reg-rol').value;
-    const zona = $('reg-zona').value;
-    $('reg-bloque-cod').hidden = !necesitaCodigo(rol);
-    $('reg-cod-etiqueta').textContent = rol === 'GRUPO' ? 'Grupo' : 'Finca';
-    $('reg-cod').disabled = !zona;
-    $('reg-cod').placeholder = zona ? 'Escribe para buscar' : 'Primero elige la zona';
-    regBuscador.revisar(opcionesCatalogo(rol, zona));
-    if (necesitaCodigo(rol) && zona) {
-      cargarCatalogo()
-        .then(() => regBuscador.revisar(opcionesCatalogo(rol, zona)))
-        .catch(err => aviso('registro-mensaje', err.mensaje));
-    }
-  }
-  $('reg-rol').addEventListener('change', actualizarBloqueCodigo);
-  $('reg-zona').addEventListener('change', actualizarBloqueCodigo);
-  $('reg-clave').addEventListener('input', reglasRegistro);
-  $('reg-confirmar').addEventListener('input', reglasRegistro);
-
-  function irARegistro() {
-    $('form-registro').reset();
-    regBuscador.limpiar();
-    aviso('registro-mensaje', '');
-    $('registro-bloque-form').hidden = false;
-    $('registro-listo').hidden = true;
-    actualizarBloqueCodigo();
-    reglasRegistro();
-    mostrar('vista-registro');
-    cargarCatalogo().catch(() => { /* se reintenta al elegir rol y zona */ });
-  }
-
-  // Las mismas reglas que revisa el servidor; aquí solo ahorran un viaje.
-  function validarRegistro() {
-    const rol = $('reg-rol').value;
-    if (!$('reg-nombre').value.trim()) return 'Escribe tu nombre.';
-    if (!CORREO_VALIDO.test($('reg-correo').value.trim())) return 'Escribe un correo válido, por ejemplo nombre@correo.com.';
-    if (!$('reg-zona').value) return 'Elige tu zona.';
-    if (ROLES_SOLICITABLES.indexOf(rol) < 0) return 'Elige el rol que solicitas.';
-    if (necesitaCodigo(rol) && !$('reg-cod').dataset.cod) {
-      return rol === 'FINCA' ? 'Elige tu finca de la lista.' : 'Elige tu grupo de la lista.';
-    }
-    if (!reglasRegistro()) return 'Revisa que la contraseña cumpla todas las reglas.';
-    return '';
-  }
-
-  $('form-registro').addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const error = validarRegistro();
-    if (error) { aviso('registro-mensaje', error); return; }
-
-    aviso('registro-mensaje', '');
-    const rol = $('reg-rol').value;
-    const boton = $('registro-boton');
-    ocupado(boton, true, 'Enviando…');
-    try {
-      await Api.llamar('registrarse', {
-        nombre: $('reg-nombre').value.trim(),
-        correo: $('reg-correo').value.trim(),
-        celular: $('reg-celular').value.trim(),
-        zona: $('reg-zona').value,
-        rol: rol,
-        cod_finca_o_grupo: necesitaCodigo(rol) ? $('reg-cod').dataset.cod : '',
-        clave: $('reg-clave').value,
-        dispositivo: dispositivo()
-      });
-      $('form-registro').reset(); // la contraseña no queda escrita en la pantalla
-      regBuscador.limpiar();
-      $('registro-bloque-form').hidden = true;
-      $('registro-listo').hidden = false;
-      window.scrollTo(0, 0);
-    } catch (err) {
-      manejarError(err, 'registro-mensaje');
-    } finally {
-      ocupado(boton, false);
-    }
-  });
-
-  $('login-registro').addEventListener('click', irARegistro);
-  $('registro-volver').addEventListener('click', () => mostrar('vista-login'));
-  $('registro-listo-volver').addEventListener('click', () => mostrar('vista-login'));
-
-  // ---------- Solicitudes pendientes (ADMIN) ----------
-  // Trae la lista y el catálogo (para mostrar nombres de finca/grupo; si falla, se muestran códigos).
-  async function cargarPendientes(s, idMensaje) {
-    $('inicio-pendientes-n').textContent = '…';
-    try {
-      const [lista] = await Promise.all([
-        Api.llamar('listarPendientes', {}, s.token),
-        cargarCatalogo().catch(() => null)
-      ]);
-      pendientes = lista;
-      $('inicio-pendientes-n').textContent = lista.length;
-      return true;
-    } catch (err) {
-      $('inicio-pendientes-n').textContent = '?';
-      manejarError(err, idMensaje);
-      return false;
-    }
-  }
-
-  async function actualizarPendientes() {
-    const s = leerSesion();
-    if (!s) { mostrar('vista-login'); return; }
-    $('pendientes-resumen').textContent = 'Cargando…';
-    $('pendientes-lista').replaceChildren();
-    if (await cargarPendientes(s, 'pendientes-mensaje')) pintarPendientes();
-  }
-
-  function pintarPendientes() {
-    const n = pendientes.length;
-    $('pendientes-resumen').textContent = n === 0 ? 'No hay solicitudes pendientes.'
-      : n === 1 ? 'Hay 1 solicitud esperando tu revisión.'
-      : 'Hay ' + n + ' solicitudes esperando tu revisión.';
-    $('inicio-pendientes-n').textContent = n;
-    $('pendientes-lista').replaceChildren(...pendientes.map(tarjetaSolicitud));
-  }
-
-  function tarjetaSolicitud(u) {
-    const tarjeta = crear('article', 'tarjeta solicitud');
-    tarjeta.appendChild(crear('h2', '', u.nombre));
-
-    const fecha = u.fecha_registro
-      ? new Date(u.fecha_registro).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })
-      : '—';
-    const datos = crear('dl', 'solicitud__datos');
-    [
-      ['Rol', ROLES[u.rol] || u.rol],
-      ['Finca o grupo', nombreCatalogo(u.rol, u.cod_finca_o_grupo)],
-      ['Zona', ZONAS[u.zona] || u.zona],
-      ['Correo', u.correo],
-      ['Celular', u.celular || '—'],
-      ['Fecha', fecha]
-    ].forEach(([k, v]) => {
-      datos.appendChild(crear('dt', '', k));
-      datos.appendChild(crear('dd', '', String(v)));
-    });
-    tarjeta.appendChild(datos);
-
-    const mensaje = crear('div', 'mensaje');
-    mensaje.setAttribute('role', 'alert');
-    mensaje.hidden = true;
-
-    const panelAprobar = panelAprobacion(u, mensaje);
-    const panelRechazar = panelRechazo(u, mensaje);
-    const bAprobar = crear('button', 'boton', 'Aprobar');
-    const bRechazar = crear('button', 'boton boton--peligro', 'Rechazar');
-    bAprobar.type = bRechazar.type = 'button';
-    bAprobar.addEventListener('click', () => {
-      panelAprobar.hidden = !panelAprobar.hidden;
-      panelRechazar.hidden = true;
-      aviso(mensaje, '');
-    });
-    bRechazar.addEventListener('click', () => {
-      panelRechazar.hidden = !panelRechazar.hidden;
-      panelAprobar.hidden = true;
-      aviso(mensaje, '');
-    });
-    const acciones = crear('div', 'solicitud__acciones');
-    acciones.append(bAprobar, bRechazar);
-
-    tarjeta.append(acciones, panelAprobar, panelRechazar, mensaje);
-    return tarjeta;
-  }
-
-  // Aprobar: confirma o ajusta el rol (nunca ADMIN). Si el rol final es FINCA o
-  // GRUPO pide elegir cuál; si no, se envía TODAS para no dejar un código viejo.
-  function panelAprobacion(u, mensaje) {
-    const id = 'ap-' + u.id_usuario;
-    const panel = crear('div', 'solicitud__panel');
-    panel.hidden = true;
-
-    const lRol = crear('label', '', 'Rol que se aprueba');
-    lRol.htmlFor = id + '-rol';
-    const select = crear('select');
-    select.id = id + '-rol';
-    llenarRoles(select, u.rol);
-
-    const bloque = crear('div');
-    const lCod = crear('label');
-    lCod.htmlFor = id + '-cod';
-    const caja = crear('div', 'buscador');
-    const input = crear('input');
-    input.id = id + '-cod';
-    input.autocomplete = 'off';
-    input.placeholder = 'Escribe para buscar';
-    const lista = crear('ul', 'buscador__lista');
-    lista.hidden = true;
-    caja.append(input, lista);
-    bloque.append(lCod, caja);
-    const buscador = crearBuscador(input, lista, () => opcionesCatalogo(select.value, u.zona));
-
-    if (necesitaCodigo(u.rol) && u.cod_finca_o_grupo && u.cod_finca_o_grupo !== 'TODAS') {
-      const lista0 = opcionesCatalogo(u.rol, u.zona) || [];
-      buscador.elegir(lista0.find(op => op.cod === u.cod_finca_o_grupo) || { cod: u.cod_finca_o_grupo });
-    }
-    function ajustar() {
-      bloque.hidden = !necesitaCodigo(select.value);
-      lCod.textContent = select.value === 'GRUPO' ? 'Grupo' : 'Finca';
-      buscador.revisar(opcionesCatalogo(select.value, u.zona));
-    }
-    select.addEventListener('change', ajustar);
-    ajustar();
-
-    const confirmar = crear('button', 'boton', 'Confirmar aprobación');
-    confirmar.type = 'button';
-    confirmar.addEventListener('click', () => {
-      const rol = select.value;
-      if (ROLES_SOLICITABLES.indexOf(rol) < 0) { aviso(mensaje, 'Elige un rol válido.'); return; }
-      const cod = necesitaCodigo(rol) ? input.dataset.cod || '' : 'TODAS';
-      if (!cod) { aviso(mensaje, rol === 'FINCA' ? 'Elige la finca de la lista.' : 'Elige el grupo de la lista.'); return; }
-      resolver(u, 'aprobarUsuario',
-        { id_usuario: u.id_usuario, rol: rol, cod_finca_o_grupo: cod, zona: u.zona },
-        confirmar, mensaje, 'Aprobada: ' + u.nombre + ' ya puede ingresar como ' + ROLES[rol] + '.');
-    });
-
-    panel.append(lRol, select, bloque, confirmar);
-    return panel;
-  }
-
-  // Rechazar: el motivo es obligatorio (queda en la bitácora del servidor).
-  function panelRechazo(u, mensaje) {
-    const id = 're-' + u.id_usuario;
-    const panel = crear('div', 'solicitud__panel');
-    panel.hidden = true;
-    const etiqueta = crear('label', '', 'Motivo del rechazo');
-    etiqueta.htmlFor = id + '-motivo';
-    const motivo = crear('textarea');
-    motivo.id = id + '-motivo';
-    motivo.rows = 3;
-    const confirmar = crear('button', 'boton boton--peligro-lleno', 'Confirmar rechazo');
-    confirmar.type = 'button';
-    confirmar.addEventListener('click', () => {
-      const texto = motivo.value.trim();
-      if (!texto) { aviso(mensaje, 'Escribe el motivo del rechazo.'); motivo.focus(); return; }
-      resolver(u, 'rechazarUsuario', { id_usuario: u.id_usuario, motivo: texto },
-        confirmar, mensaje, 'Rechazada la solicitud de ' + u.nombre + '.');
-    });
-    panel.append(etiqueta, motivo, confirmar);
-    return panel;
-  }
-
-  async function resolver(u, accion, datos, boton, mensaje, textoOk) {
-    const s = leerSesion();
-    if (!s) { mostrar('vista-login'); return; }
-    aviso(mensaje, '');
-    ocupado(boton, true, 'Guardando…');
-    try {
-      await Api.llamar(accion, datos, s.token);
-      pendientes = pendientes.filter(x => x.id_usuario !== u.id_usuario);
-      pintarPendientes();
-      aviso('pendientes-mensaje', textoOk, 'ok');
-      window.scrollTo(0, 0);
-    } catch (err) {
-      if (err.codigo === 'ESTADO') {
-        // Otra persona ya la resolvió: se trae la lista de nuevo.
-        await actualizarPendientes();
-        aviso('pendientes-mensaje', 'Esa solicitud ya había sido resuelta. Actualicé la lista.', 'info');
-      } else {
-        manejarError(err, mensaje);
-      }
-    } finally {
-      ocupado(boton, false);
-    }
-  }
-
-  $('inicio-pendientes').addEventListener('click', () => {
-    aviso('pendientes-mensaje', '');
-    mostrar('vista-pendientes');
-    actualizarPendientes();
-  });
-  $('pendientes-volver').addEventListener('click', () => {
-    const s = leerSesion();
-    s ? irAInicio(s) : mostrar('vista-login');
-  });
-
   // ---------- Mostrar / ocultar contraseña ----------
   document.querySelectorAll('.ver-clave').forEach(b => {
     b.addEventListener('click', () => {
@@ -575,20 +304,34 @@
     });
   });
 
-  // ---------- Arranque ----------
-  $('version').textContent = CONFIG_APP.VERSION;
-  const s = leerSesion();
-  if (s && s.perfil.cambiar_clave) {
-    // La clave temporal ya no está en memoria: hay que ingresar de nuevo.
-    borrarSesion();
-    mostrar('vista-login');
-  } else if (s) {
-    irAInicio(s);
-  } else {
-    mostrar('vista-login');
-  }
+  // ---------- Lo que comparten los módulos ----------
+  window.App = {
+    $, ROLES, ROLES_SOLICITABLES, ZONAS, CORREO_VALIDO, necesitaCodigo,
+    leerSesion, dispositivo, mostrar, aviso, ocupado, crear, normalizar, llenarRoles,
+    manejarError, evaluarReglas, irAInicio, volverAInicio,
+    cargarCatalogo, olvidarCatalogo, opcionesCatalogo, textoOpcion, nombreCatalogo, crearBuscador,
+    alEntrarInicio: fn => ganchosInicio.push(fn),
+    alSalir: fn => ganchosSalir.push(fn)
+  };
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => { /* la app funciona igual */ });
-  }
+  // ---------- Arranque ----------
+  // DOMContentLoaded llega cuando ya se cargaron TODOS los scripts de index.html,
+  // así los módulos ya se engancharon con alEntrarInicio antes de mostrar el inicio.
+  document.addEventListener('DOMContentLoaded', () => {
+    $('version').textContent = CONFIG_APP.VERSION;
+    const s = leerSesion();
+    if (s && s.perfil.cambiar_clave) {
+      // La clave temporal ya no está en memoria: hay que ingresar de nuevo.
+      borrarSesion();
+      mostrar('vista-login');
+    } else if (s) {
+      irAInicio(s);
+    } else {
+      mostrar('vista-login');
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* la app funciona igual */ });
+    }
+  });
 })();

@@ -17,11 +17,13 @@ la puerta, no la llave.
 ## Archivos
 | Archivo | Responsabilidad |
 |---|---|
-| `index.html` | Estructura de las vistas (`vista-login`, `vista-clave`, `vista-inicio`) |
+| `index.html` | Estructura de las vistas (`vista-login`, `vista-clave`, `vista-inicio`, `vista-registro`, `vista-pendientes`) |
 | `css/estilos.css` | Colores y estilos según Manual de Marca |
 | `js/config.js` | `CONFIG_APP`: URL del servidor (`/exec`), versión, tiempo de espera |
 | `js/api.js` | `Api.llamar(accion, datos, token)`: única puerta al servidor |
-| `js/app.js` | Lógica de vistas: ingreso, cambio de contraseña, inicio, sesión |
+| `js/app.js` | Lo común: sesión, vistas, mensajes, catálogo, lista con búsqueda, ingreso, cambio de contraseña, inicio, salida y arranque. Publica el objeto `App` |
+| `js/registro.js` | Solicitar acceso (pantalla pública) |
+| `js/pendientes.js` | Solicitudes pendientes: aprobar y rechazar (solo ADMIN) |
 | `sw.js` | Service worker, estrategia "primero la red" |
 | `manifest.json` | Nombre, colores e íconos de la app instalable |
 
@@ -34,6 +36,13 @@ la puerta, no la llave.
 5. Diseño **móvil primero**: campos de 16 px o más (evita el zoom en iPhone), botones grandes, una columna.
 6. Textos de la interfaz en español, tono cercano y claro, pensando en personal de finca.
 7. Al cambiar archivos, subir `CONFIG_APP.VERSION` y el nombre `CACHE` en `sw.js`.
+8. **Un archivo JS por módulo.** Lo común vive en `app.js` y se comparte con el objeto global `App`
+   (`App.aviso`, `App.crear`, `App.leerSesion`…). Cada módulo es una función que se ejecuta sola, `(function () { … })();`, y:
+   - se engancha con `App.alEntrarInicio(fn)` para mostrar sus botones según el rol, y con `App.alSalir(fn)` para
+     borrar sus datos en memoria al cerrar sesión;
+   - se carga en `index.html` **después** de `app.js`, y se agrega a `ARCHIVOS` en `sw.js`;
+   - nunca llama funciones de otro módulo: si algo se necesita en dos módulos, va a `app.js`.
+9. Crear elementos con `App.crear` (usa `textContent`). Nunca `innerHTML` con datos que vienen del servidor.
 
 ## Marca Unibán (Manual de Marca)
 | Uso | Color |
