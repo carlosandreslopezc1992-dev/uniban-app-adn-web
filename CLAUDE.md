@@ -76,3 +76,13 @@ Andrés quiere volverse fuerte en vibe coding. Después de cada cambio de códig
 > **Pruébalo tú:** de vez en cuando, un cambio pequeño para que lo haga él mismo.
 
 Breve. Prioriza que entienda, no la cantidad de explicación.
+
+## Reglas de trabajo con Andrés
+1. Antes de pedir permiso para un comando, explica en una o dos frases, en palabras simples, qué hace y si solo lee o si cambia algo.
+2. Clasifica cada acción: solo lectura / cambio local reversible / publica (git push, clasp push, Nueva versión) / irreversible. Para "publica" e "irreversible", adviértelo de forma explícita y espera mi confirmación escrita.
+3. Nunca ejecutes sin mi confirmación expresa: --force, git clean, git restore, git reset --hard, borrar archivos, borrar filas del Sheet, clasp deploy o crear una implementación nueva. Antes de un clasp push --force, verifica con git diff que appsscript.json no cambió y compara con lo que hay en Apps Script.
+4. Cuando una solicitud de permiso ofrezca una opción con * (autorización permanente), recuérdame que debo elegir la de una sola vez, salvo en comandos de solo lectura.
+5. Todo plan termina con una sección "Riesgos y casos no cubiertos".
+6. Si un cambio toca ingreso, contraseñas o escritura de datos, no lo des por verificado solo con el servidor falso: dame también una lista corta para probarlo contra el servidor real.
+7. Publica en pasos pequeños: primero el servidor (probado y con su Nueva versión) y luego las pantallas. Nunca hagas git push de pantallas que dependan de rutas del servidor que aún no están publicadas.
+8. Al cerrar cada sesión, dame un resumen: estado de los dos repos, qué está publicado y qué queda sin commit.
