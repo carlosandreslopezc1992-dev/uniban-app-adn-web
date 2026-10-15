@@ -163,6 +163,13 @@
         <h2>Tu módulo</h2>
         <p class="ayuda">Aquí aparecerán las opciones de tu rol a medida que se construyan.</p>
         <button type="button" class="boton" id="inicio-pendientes" hidden>Solicitudes pendientes (<span id="inicio-pendientes-n">…</span>)</button>
+        <div class="bloque-maestros" id="inicio-maestros" hidden>
+          <h3>Maestros</h3>
+          <div class="botones-dos">
+            <button type="button" class="boton boton--secundario" id="inicio-fincas">Fincas</button>
+            <button type="button" class="boton boton--secundario" id="inicio-grupos">Grupos</button>
+          </div>
+        </div>
         <div class="mensaje" id="inicio-mensaje" role="alert" hidden></div>
       </div>
 
@@ -180,6 +187,159 @@
       <div class="lista-solicitudes" id="pendientes-lista"></div>
       <button type="button" class="boton boton--secundario" id="pendientes-volver">Volver al inicio</button>
     </section>
+
+    <!-- ===== Vista: Maestro de fincas o grupos (solo ADMIN) ===== -->
+    <section id="vista-maestro" class="vista" hidden>
+      <div class="tarjeta">
+        <h1 id="maestro-titulo">Fincas</h1>
+        <p class="ayuda" id="maestro-resumen"></p>
+        <button type="button" class="boton" id="maestro-nueva">Nueva finca</button>
+
+        <label for="maestro-buscar">Buscar por código o nombre</label>
+        <input id="maestro-buscar" type="search" autocomplete="off" spellcheck="false">
+        <div class="filtros">
+          <div>
+            <label for="maestro-zona">Zona</label>
+            <select id="maestro-zona">
+              <option value="">Todas</option>
+              <option value="URABA">Urabá</option>
+              <option value="SM">Santa Marta</option>
+            </select>
+          </div>
+          <div>
+            <label for="maestro-estado">Estado</label>
+            <select id="maestro-estado">
+              <option value="ACTIVO">Activos</option>
+              <option value="INACTIVO">Inactivos</option>
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div id="maestro-bloque-tipo">
+            <label for="maestro-tipo">Tipo</label>
+            <select id="maestro-tipo">
+              <option value="">Todos</option>
+              <option value="GRUPO">Grupo</option>
+              <option value="INDEPENDIENTE">Independiente</option>
+            </select>
+          </div>
+        </div>
+        <div class="mensaje" id="maestro-mensaje" role="alert" hidden></div>
+      </div>
+      <div class="lista-solicitudes" id="maestro-lista"></div>
+      <p class="ayuda maestro-mas" id="maestro-mas" hidden></p>
+      <button type="button" class="boton boton--secundario" id="maestro-volver">Volver al inicio</button>
+    </section>
+
+    <!-- ===== Vista: Crear o editar finca (solo ADMIN) ===== -->
+    <section id="vista-finca-form" class="vista" hidden>
+      <div class="tarjeta">
+        <h1 id="finca-titulo">Nueva finca</h1>
+        <form id="form-finca" novalidate>
+          <label for="finca-cod">Código de la finca</label>
+          <input id="finca-cod" class="campo-codigo" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <p class="ayuda ayuda--campo" id="finca-cod-ayuda" hidden>El código no se puede cambiar.</p>
+
+          <label for="finca-nombre">Nombre</label>
+          <input id="finca-nombre" maxlength="80" autocomplete="off">
+
+          <label for="finca-zona">Zona</label>
+          <select id="finca-zona">
+            <option value="">Elige la zona</option>
+            <option value="URABA">Urabá</option>
+            <option value="SM">Santa Marta</option>
+          </select>
+          <p class="ayuda ayuda--campo" id="finca-zona-ayuda" hidden></p>
+
+          <label for="finca-grupo">Grupo</label>
+          <select id="finca-grupo"></select>
+          <p class="ayuda ayuda--campo" id="finca-grupo-ayuda" hidden></p>
+
+          <fieldset class="casillas">
+            <legend>Certificaciones</legend>
+            <div class="casillas__opciones">
+              <label class="casilla"><input type="checkbox" name="finca-cert" value="RA"> RA</label>
+              <label class="casilla"><input type="checkbox" name="finca-cert" value="FT"> FT</label>
+              <label class="casilla"><input type="checkbox" name="finca-cert" value="ORG-UE"> ORG-UE</label>
+              <label class="casilla"><input type="checkbox" name="finca-cert" value="ORG-USDA"> ORG-USDA</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="casillas">
+            <legend>¿Seleccionada por el cliente?</legend>
+            <div class="casillas__opciones">
+              <label class="casilla"><input type="radio" name="finca-cliente" value="SI"> Sí</label>
+              <label class="casilla"><input type="radio" name="finca-cliente" value="NO" checked> No</label>
+            </div>
+          </fieldset>
+
+          <div class="mensaje" id="finca-mensaje" role="alert" hidden></div>
+          <button type="submit" class="boton" id="finca-guardar">Guardar finca</button>
+          <button type="button" class="boton boton--secundario" id="finca-cancelar">Cancelar</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== Vista: Crear o editar grupo (solo ADMIN) ===== -->
+    <section id="vista-grupo-form" class="vista" hidden>
+      <div class="tarjeta">
+        <h1 id="grupo-titulo">Nuevo grupo</h1>
+        <form id="form-grupo" novalidate>
+          <fieldset class="casillas">
+            <legend>Tipo</legend>
+            <div class="casillas__opciones casillas__opciones--una">
+              <label class="casilla"><input type="radio" name="grupo-tipo" value="GRUPO" checked> Grupo: varias fincas, con coordinador</label>
+              <label class="casilla"><input type="radio" name="grupo-tipo" value="INDEPENDIENTE"> Independiente: una sola finca, Unibán le compra directo</label>
+            </div>
+          </fieldset>
+          <p class="ayuda ayuda--campo" id="grupo-tipo-ayuda" hidden></p>
+
+          <label for="grupo-cod">Código</label>
+          <input id="grupo-cod" class="campo-codigo" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <p class="ayuda ayuda--campo" id="grupo-cod-ayuda" hidden>El código no se puede cambiar.</p>
+
+          <label for="grupo-nombre">Nombre</label>
+          <input id="grupo-nombre" maxlength="80" autocomplete="off">
+
+          <label for="grupo-zona">Zona</label>
+          <select id="grupo-zona">
+            <option value="">Elige la zona</option>
+            <option value="URABA">Urabá</option>
+            <option value="SM">Santa Marta</option>
+          </select>
+          <p class="ayuda ayuda--campo" id="grupo-zona-ayuda" hidden></p>
+
+          <div id="grupo-bloque-coord">
+            <label for="grupo-coord">Coordinador (opcional)</label>
+            <select id="grupo-coord"></select>
+            <p class="ayuda ayuda--campo" id="grupo-coord-ayuda" hidden></p>
+          </div>
+
+          <div id="grupo-bloque-indep" hidden>
+            <div class="mensaje mensaje--info">Se creará también la finca con este mismo código, nombre y zona.</div>
+            <fieldset class="casillas">
+              <legend>Certificaciones de la finca</legend>
+              <div class="casillas__opciones">
+                <label class="casilla"><input type="checkbox" name="grupo-cert" value="RA"> RA</label>
+                <label class="casilla"><input type="checkbox" name="grupo-cert" value="FT"> FT</label>
+                <label class="casilla"><input type="checkbox" name="grupo-cert" value="ORG-UE"> ORG-UE</label>
+                <label class="casilla"><input type="checkbox" name="grupo-cert" value="ORG-USDA"> ORG-USDA</label>
+              </div>
+            </fieldset>
+            <fieldset class="casillas">
+              <legend>¿Seleccionada por el cliente?</legend>
+              <div class="casillas__opciones">
+                <label class="casilla"><input type="radio" name="grupo-cliente" value="SI"> Sí</label>
+                <label class="casilla"><input type="radio" name="grupo-cliente" value="NO" checked> No</label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="mensaje" id="grupo-mensaje" role="alert" hidden></div>
+          <button type="submit" class="boton" id="grupo-guardar">Guardar grupo</button>
+          <button type="button" class="boton boton--secundario" id="grupo-cancelar">Cancelar</button>
+        </form>
+      </div>
+    </section>
   </main>
 
   <footer class="pie">App ADN · Unibán · v<span id="version"></span></footer>
@@ -189,5 +349,6 @@
   <script src="js/app.js"></script>
   <script src="js/registro.js"></script>
   <script src="js/pendientes.js"></script>
+  <script src="js/maestros.js"></script>
 </body>
 </html>

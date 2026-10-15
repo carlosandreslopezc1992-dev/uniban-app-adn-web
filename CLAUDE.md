@@ -17,13 +17,14 @@ la puerta, no la llave.
 ## Archivos
 | Archivo | Responsabilidad |
 |---|---|
-| `index.html` | Estructura de las vistas (`vista-login`, `vista-clave`, `vista-inicio`, `vista-registro`, `vista-pendientes`) |
+| `index.html` | Estructura de las vistas (`vista-login`, `vista-clave`, `vista-inicio`, `vista-registro`, `vista-pendientes`, `vista-maestro`, `vista-finca-form`, `vista-grupo-form`) |
 | `css/estilos.css` | Colores y estilos según Manual de Marca |
 | `js/config.js` | `CONFIG_APP`: URL del servidor (`/exec`), versión, tiempo de espera |
 | `js/api.js` | `Api.llamar(accion, datos, token)`: única puerta al servidor |
 | `js/app.js` | Lo común: sesión, vistas, mensajes, catálogo, lista con búsqueda, ingreso, cambio de contraseña, inicio, salida y arranque. Publica el objeto `App` |
 | `js/registro.js` | Solicitar acceso (pantalla pública) |
 | `js/pendientes.js` | Solicitudes pendientes: aprobar y rechazar (solo ADMIN) |
+| `js/maestros.js` | Maestros de Fincas y Grupos: lista con buscador y filtros, crear, editar, inactivar y reactivar (solo ADMIN) |
 | `sw.js` | Service worker, estrategia "primero la red" |
 | `manifest.json` | Nombre, colores e íconos de la app instalable |
 

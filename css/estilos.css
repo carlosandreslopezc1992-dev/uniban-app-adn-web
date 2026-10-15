@@ -169,5 +169,40 @@ form .boton--secundario { margin-top: 10px; }
 .solicitud__acciones .boton { margin-top: 0; }
 .solicitud__panel { margin-top: 14px; padding-top: 2px; border-top: 2px solid var(--arena); }
 
+/* ---------- Maestros (fincas y grupos) ---------- */
+.bloque-maestros { margin-top: 18px; padding-top: 14px; border-top: 2px solid var(--arena); }
+.bloque-maestros h3 { color: var(--verde); font-size: 16px; font-weight: 800; margin: 0; }
+.botones-dos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tarjeta--modulo .botones-dos .boton { margin-top: 10px; }
+
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0 10px; }
+.maestro-mas { text-align: center; margin: 0; }
+.campo-codigo { text-transform: uppercase; }
+select:disabled { background: var(--arena); color: var(--gris); }
+.ayuda--campo { margin: 6px 0 0; font-size: 13px; }
+
+.registro { border-left: 5px solid var(--verde); }
+.registro--inactivo { border-left-color: var(--gris-claro); }
+.registro .etiquetas { margin: 6px 0 0; }
+.etiqueta--inactivo { background: var(--gris-claro); color: var(--blanco); }
+.confirmacion { margin: 12px 0 0; font-size: 15px; font-weight: 600; }
+.solicitud__panel .boton { margin-top: 12px; }
+
+/* Casillas y opciones grandes, fáciles de tocar con el dedo */
+fieldset.casillas { border: 0; padding: 0; margin: 14px 0 0; min-width: 0; }
+.casillas legend { font-weight: 700; font-size: 14px; padding: 0; margin-bottom: 6px; }
+.casillas__opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.casillas__opciones--una { grid-template-columns: 1fr; }
+label.casilla {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0; padding: 10px 12px; min-height: 48px;
+  border: 2px solid var(--arena); border-radius: 10px;
+  font-weight: 600; font-size: 16px; cursor: pointer;
+}
+.casilla input { width: 22px; height: 22px; margin: 0; padding: 0; flex: none; accent-color: var(--verde); }
+.casilla:has(input:checked) { border-color: var(--verde); }
+.casilla:has(input:disabled) { background: var(--arena); cursor: default; }
+#grupo-bloque-indep .mensaje { margin-top: 14px; }
+
 /* ---------- Pie ---------- */
 .pie { text-align: center; font-size: 12px; color: var(--gris-claro); padding: 12px 0 18px; }
