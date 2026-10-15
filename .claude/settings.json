@@ -20,7 +20,17 @@
       "Bash(ls *)",
       "Bash(node --check *)",
       "Bash(clasp status)",
-      "Bash(clasp deployments)"
+      "Bash(clasp deployments)",
+      "Bash(git -C ../uniban-app-adn status*)",
+      "Bash(git -C ../uniban-app-adn log*)",
+      "Bash(git -C ../uniban-app-adn diff*)",
+      "Bash(git -C ../uniban-app-adn show*)",
+      "Bash(git -C ../uniban-app-adn ls-remote*)",
+      "Bash(git -C ../uniban-app-adn-web status*)",
+      "Bash(git -C ../uniban-app-adn-web log*)",
+      "Bash(git -C ../uniban-app-adn-web diff*)",
+      "Bash(git -C ../uniban-app-adn-web show*)",
+      "Bash(git -C ../uniban-app-adn-web ls-remote*)"
     ],
     "ask": [
       "Bash(git commit *)",
