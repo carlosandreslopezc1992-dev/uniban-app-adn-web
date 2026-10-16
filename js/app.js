@@ -314,11 +314,26 @@
     alSalir: fn => ganchosSalir.push(fn)
   };
 
+  // ---------- Entorno ----------
+  // Fuera de GitHub Pages, la barra dice a qué servidor habla la app, para no confundir
+  // la pestaña de pruebas con la real. En producción la etiqueta queda oculta.
+  function mostrarEntorno() {
+    if (CONFIG_APP.ES_PRODUCCION) return;
+    const real = Api.esServidorReal();
+    const problema = Api.problemaConfig();
+    const e = $('entorno');
+    e.textContent = problema ? (real ? 'REAL BLOQUEADO' : 'SIN SERVIDOR') : real ? 'SERVIDOR REAL' : 'PRUEBAS';
+    if (problema || real) e.classList.add('barra__entorno--alerta');
+    e.title = problema || CONFIG_APP.URL_SERVIDOR;
+    e.hidden = false;
+  }
+
   // ---------- Arranque ----------
   // DOMContentLoaded llega cuando ya se cargaron TODOS los scripts de index.html,
   // así los módulos ya se engancharon con alEntrarInicio antes de mostrar el inicio.
   document.addEventListener('DOMContentLoaded', () => {
     $('version').textContent = CONFIG_APP.VERSION;
+    mostrarEntorno();
     const s = leerSesion();
     if (s && s.perfil.cambiar_clave) {
       // La clave temporal ya no está en memoria: hay que ingresar de nuevo.

@@ -19,7 +19,8 @@ la puerta, no la llave.
 |---|---|
 | `index.html` | Estructura de las vistas (`vista-login`, `vista-clave`, `vista-inicio`, `vista-registro`, `vista-pendientes`, `vista-maestro`, `vista-finca-form`, `vista-grupo-form`) |
 | `css/estilos.css` | Colores y estilos según Manual de Marca |
-| `js/config.js` | `CONFIG_APP`: URL del servidor (`/exec`), versión, tiempo de espera |
+| `js/config.js` | `CONFIG_APP`: URL del servidor real (`/exec`), versión, tiempo de espera. Fuera de GitHub Pages carga `js/config.local.js` |
+| `js/config.local.ejemplo.js` | Plantilla de `js/config.local.js` (la URL del servidor de pruebas de cada uno). `js/config.local.js` está en `.gitignore`: nunca se sube |
 | `js/api.js` | `Api.llamar(accion, datos, token)`: única puerta al servidor |
 | `js/app.js` | Lo común: sesión, vistas, mensajes, catálogo, lista con búsqueda, ingreso, cambio de contraseña, inicio, salida y arranque. Publica el objeto `App` |
 | `js/registro.js` | Solicitar acceso (pantalla pública) |
@@ -30,6 +31,8 @@ la puerta, no la llave.
 
 ## Reglas de código
 1. Toda llamada al servidor pasa por `Api.llamar`. Se envía como `text/plain` para evitar la consulta CORS previa.
+   **Fuera de GitHub Pages la app nunca usa el servidor real**: sin `js/config.local.js`, o si apunta al real sin
+   `PERMITIR_SERVIDOR_REAL` (solo Andrés), `Api.llamar` se detiene antes de enviar nada.
 2. El servidor responde `{ ok, datos }` o `{ ok:false, error, codigo }`. Si `codigo === 'SESION'`, volver al ingreso.
 3. La sesión (token + perfil + vencimiento) se guarda en `localStorage` con la llave `adn_sesion`.
    **La contraseña nunca se guarda**; solo vive en memoria durante el cambio obligatorio.
@@ -63,6 +66,7 @@ Usar las variables CSS de `:root`; no escribir colores sueltos.
 
 ## Flujo para cada cambio
 1. Editar y probar con **Live Server** (botón "Go Live" de VS Code), nunca abriendo el archivo con `file:///`.
+   Live Server necesita `js/config.local.js` con la URL del servidor de pruebas (ver `js/config.local.ejemplo.js`).
 2. Commit con mensaje en español → **pedir permiso a Andrés antes de `git push`**.
 3. GitHub Pages publica en 1 o 2 minutos (pestaña Actions con ✅).
 4. Las apps instaladas se actualizan solas al abrirse con internet.

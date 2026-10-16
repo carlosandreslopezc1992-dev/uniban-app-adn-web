@@ -48,6 +48,16 @@ body {
   border-left: 1px solid rgba(228, 224, 219, 0.5);
   padding-left: 12px;
 }
+/* Solo fuera de GitHub Pages: a qué servidor habla la app */
+.barra__entorno {
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+  background: var(--lima); color: var(--gris);
+  font-size: 11px; font-weight: 800; letter-spacing: 0.04em;
+  padding: 4px 10px; border-radius: 999px;
+}
+.barra__entorno--alerta { background: var(--naranja); }
 
 /* ---------- Contenido ---------- */
 main { flex: 1; width: 100%; max-width: 460px; margin: 0 auto; padding: 20px 16px; }

@@ -5,7 +5,7 @@
  * publiquemos se ven de inmediato.
  * Las llamadas al servidor (POST a Apps Script) no pasan por aquí.
  */
-const CACHE = 'adn-v0.3.0';
+const CACHE = 'adn-v0.3.1';
 const ARCHIVOS = [
   './', 'index.html', 'css/estilos.css', 'js/config.js', 'js/api.js', 'js/app.js',
   'js/registro.js', 'js/pendientes.js', 'js/maestros.js',

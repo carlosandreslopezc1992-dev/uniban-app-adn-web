@@ -1,0 +1,5 @@
+# Configuración local de cada desarrollador (URL de su servidor de pruebas)
+js/config.local.js
+
+# Permisos personales de Claude Code
+.claude/settings.local.json
